@@ -1,16 +1,25 @@
-export default function initScrollSuave() {
-  const linksInternos = document.querySelectorAll('[data-menu="suave"] a[href^="#"]');
+export default class ScrollSuave {
+  constructor(links, options) {
+    this.linksInternos = document.querySelectorAll(links);
+    if (options === undefined){
+      this.options = {behavior: 'smooth', block: 'start'};
+    } else{
+      this.options = options;
+    }
 
-  function scrollToSection(event) {
-    event.preventDefault();
-    const href = event.currentTarget.getAttribute('href');
-    const section = document.querySelector(href);
-    section.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
+    this.scrollToSection = this.scrollToSection.bind(this);
 
-    // forma alternativa
+    // Garantindo que o this dentro de scrollToSection se refira à instância da classe
+    //this.scrollToSection = this.scrollToSection.bind(this);
+  }
+ 
+  scrollToSection(event) {
+    event.preventDefault(); // Captura o evento corretamente
+    const href = event.currentTarget.getAttribute('href'); // Obtém o href do link
+    const section = document.querySelector(href); // Seleciona a seção com base no href
+    section.scrollIntoView(this.options); // Aplica a rolagem suave para a seção
+
+    // Forma alternativa comentada:
     // const topo = section.offsetTop;
     // window.scrollTo({
     //   top: topo,
@@ -18,7 +27,17 @@ export default function initScrollSuave() {
     // });
   }
 
-  linksInternos.forEach((link) => {
-    link.addEventListener('click', scrollToSection);
-  });
+  addLinkEvent() {
+    this.linksInternos.forEach((link) => {
+      // Usa uma arrow function para garantir o correto repasse do evento e o contexto de 'this'
+      link.addEventListener('click',  this.scrollToSection);
+    });
+  }
+
+  init() {
+    if(this.linksInternos.length){
+      this.addLinkEvent();
+    }
+    return this;
+}
 }
